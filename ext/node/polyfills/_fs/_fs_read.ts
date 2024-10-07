@@ -62,10 +62,6 @@ export function read(
     throw new ERR_INVALID_ARG_TYPE("fd", "number", fd);
   }
 
-  if (length == null) {
-    length = 0;
-  }
-
   if (typeof offsetOrCallback === "function") {
     cb = offsetOrCallback;
   } else if (typeof optOrBufferOrCb === "function") {
@@ -80,6 +76,8 @@ export function read(
     isArrayBufferView(optOrBufferOrCb)
   ) {
     buffer = optOrBufferOrCb;
+    length = length ?? buffer.byteLength - offset;
+    position = position ?? null;
   } else if (typeof optOrBufferOrCb === "function") {
     offset = 0;
     buffer = Buffer.alloc(16384);
@@ -172,18 +170,17 @@ export function readSync(
 
   validateBuffer(buffer);
 
-  if (length == null) {
-    length = 0;
-  }
-
   if (typeof offsetOrOpt === "number") {
     offset = offsetOrOpt;
+    length = length ?? buffer.byteLength - offset;
     validateInteger(offset, "offset", 0);
   } else if (offsetOrOpt !== undefined) {
     const opt = offsetOrOpt as readSyncOptions;
     offset = opt.offset ?? 0;
     length = opt.length ?? buffer.byteLength - offset;
     position = opt.position ?? null;
+  } else {
+    length = length ?? buffer.byteLength;
   }
 
   if (position == null) {
